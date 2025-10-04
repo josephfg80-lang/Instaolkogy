@@ -1443,9 +1443,6 @@
 <body>
 
 
-
-
-
         <div  id="loading-screen">
         <div style=" position: absolute; top: 20px; text-align: center; background: #000; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(3, 250, 110, 0.3);">
         <span style="color: #fff; font-size: 30px;">Developed with ❤️ by <b style="color: #03fa6e;">Joseph Fady , Marc Akram , Samuel Mina and Jovany Fady</b></span>
@@ -1486,8 +1483,7 @@
             <h1 id="app-title">INSTA LKOGY</h1>
             <div class="developer-credit">
                 <div>
-                    <span>Developed with ❤️ by <b><a href="https://www.facebook.com/share/17D3VGxJeU/"style=color:#00ffea>Joseph Fady</a></b>
-                     and <b><a href="https://www.facebook.com/share/14KMyi3GAFe/"style=color:#902aff>Jovany Fady</a></b> </span>
+                    <span>Developed with ❤️ by Joseph Fady and Jovany Fady </span>
                     <span>in collaboration with</span>
                     <a href="https://marc-and-sam.blogspot.com/" target= "blank" style="color: #03fa6e; text-decoration:  underline #03fa6e;font-weight: 900;">
                         Marc&Sam
@@ -1518,7 +1514,9 @@
             <button class="button deposit-button" onclick="showDepositModal()">
                 إيداع لكوجي
             </button>
-            
+            <button class="button scan-button" onclick="startScanner()">
+                مسح باركود
+            </button>
             <button class="button" id="bonusChallengeBtn" style="background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: #fff;" onclick="showBonusChallengeModal()">
                 تحديات Bonus
             </button>
@@ -1541,7 +1539,7 @@
         <div id="activitiesList"></div>
         <div id="usersTableTitleContainer">
             <h1 id="usersTableTitle">Top 5</h1>
-            <img src="https://i.ibb.co/JjwysCKV/9899371.png" style="width: 50px;height: 50px;" alt="Top 5">
+            <img src="TOP5-removebg-preview.png" style="width: 50px;height: 50px;" alt="Top 5">
         </div>
         <table id="usersTable" class="card">
             <thead>
@@ -1558,7 +1556,9 @@
             <div id="historyList" class="history-container"></div>
         </div>
 
-      
+        <button class="button settings-button" onclick="showSettingsModal()">
+            الإعدادات
+        </button>
     </div>
 
     <div id="spendModal" class="modal">
@@ -2499,7 +2499,7 @@ function updateHistoryForActivity(activity) {
         // Function to get user points with caching
         // async function getUserPoints(username) {
         //     if (state.points && localStorage.getItem("username") === username) {
-        //         document.querySelector(".points-value").textContent = state.points; 
+        //         document.querySelector(".points-value").textContent = state.points;
         //         return;
         //     }
 
@@ -5227,187 +5227,6 @@ loadBonusChallenges = async function() {
     });
     }
 </script>
-
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  runTransaction,
-  arrayUnion
-} from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
-
-// ===== Firebase Config =====
-const firebaseConfig = {
-  apiKey: "AIzaSyD9B6GcLx_ghzfB6onbGuKWAjtO74Nbyso",
-  authDomain: "insta-lkogy-fb20c.firebaseapp.com",
-  projectId: "insta-lkogy-fb20c",
-  storageBucket: "insta-lkogy-fb20c.firebasestorage.app",
-  messagingSenderId: "244190720785",
-  appId: "1:244190720785:web:5881602de4b027a26452b0",
-  measurementId: "G-SQ0VX5M51D"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// ===== State =====
-let state = { points: 0, history: [] };
-
-// ===== CSS =====
-const style = document.createElement("style");
-style.textContent = `
-#offlineScreen {
-  display: none;
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
-  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-  font-family: "Segoe UI", sans-serif;
-  padding: 20px;
-  box-sizing: border-box;
-  z-index: 9999999 !important;
-  justify-content: center;
-  align-items: center;
-}
-#offlineCard {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-  padding: 30px 25px;
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-}
-#offlineCard h1 { font-size: 34px; margin-bottom: 10px; color: #333; }
-#offlineCard h2 { font-size: 28px; margin-bottom: 20px; display:inline-block; padding:8px 16px; border-radius:12px; background:#ff8c42; }
-#offlineScreen .points-value { color:white; font-weight:bold; }
-.input-container{ width:100%; display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
-#spendInput{ padding:12px; border-radius:8px; border:1px solid #ccc; text-align:center; font-size:16px; }
-#spendBtn{ padding:12px 20px; font-size:16px; background:#ff8c42; color:white; border:none; border-radius:10px; cursor:pointer; transition:0.3s; }
-#spendBtn:hover{ background:#ff6a00; }
-#historyList{ list-style:none; padding:0; max-height:220px; overflow-y:auto; }
-#historyList li{ background:rgba(0,0,0,0.05); margin:5px 0; padding:10px; border-radius:10px; color:#333; font-size:14px; }
-`;
-document.head.appendChild(style);
-
-// ===== Helper Functions =====
-function saveState(){ localStorage.setItem("instaLkogyState", JSON.stringify(state)); }
-function loadState(){ const saved=localStorage.getItem("instaLkogyState"); if(saved) state=JSON.parse(saved); updateUI(); }
-function updateUI(){
-  const pointsEls=document.querySelectorAll("#offlineScreen .points-value");
-  pointsEls.forEach(el=>el.textContent=state.points);
-  const historyList=document.getElementById("historyList");
-  if(!historyList) return;
-  historyList.innerHTML="";
-  state.history.forEach(h=>{
-    const li=document.createElement("li");
-    li.textContent=`${h.timestamp} - ${h.activityName}: ${h.points}`;
-    historyList.appendChild(li);
-  });
-}
-function addToQueue(action){ let queue=JSON.parse(localStorage.getItem("pendingActions")||"[]"); queue.push(action); localStorage.setItem("pendingActions", JSON.stringify(queue)); }
-
-// ===== Spend Function =====
-function handleSpend(){
-  const input=document.getElementById("spendInput");
-  const amount=parseInt(input.value)||0;
-  if(amount<=0||amount>state.points){ alert("Insufficient points or invalid input!"); return; }
-
-  const action={ id:Date.now(), activityName:"Spent Points", points:amount, timestamp:new Date().toLocaleString("en-US"), type:"spend" };
-  state.points-=amount;
-  state.history.unshift({...action, points:-amount});
-  saveState(); updateUI(); addToQueue(action);
-  alert(`✅ Spent ${amount} points locally (will sync when online)`); input.value="";
-}
-
-// ===== Offline UI =====
-function createOfflineUI(){
-  let offlineDiv=document.getElementById("offlineScreen");
-  if(!offlineDiv){
-    offlineDiv=document.createElement("div");
-    offlineDiv.id="offlineScreen";
-    offlineDiv.innerHTML=`
-      <div id="offlineCard">
-        <h1>📴 Offline Mode</h1>
-        <h2><span class="points-value">0</span> 💎</h2>
-        <div class="input-container">
-          <input id="spendInput" type="number" placeholder="Enter points">
-          <button id="spendBtn">💸 Spend</button>
-        </div>
-        <ul id="historyList"></ul>
-      </div>
-    `;
-    document.body.appendChild(offlineDiv);
-    document.getElementById("spendBtn").addEventListener("click", handleSpend);
-  }
-  return offlineDiv;
-}
-
-// ===== Firestore Sync =====
-async function syncWithFirestore(){
-  if(!navigator.onLine) return;
-  let queue=JSON.parse(localStorage.getItem("pendingActions")||"[]");
-  if(!queue.length) return;
-  const username=localStorage.getItem("username");
-  const password=localStorage.getItem("password");
-  if(!username||!password) return;
-
-  try{
-    const usersRef=collection(db,"users");
-    const q=query(usersRef,where("name","==",username),where("password","==",password));
-    const res=await getDocs(q);
-    if(res.empty) return;
-    const userDoc=res.docs[0];
-    const userRef=doc(db,"users",userDoc.id);
-
-    await runTransaction(db,async(transaction)=>{
-      const snap=await transaction.get(userRef);
-      let serverPoints=Number(snap.data().lkogy||0);
-      const totalSpent=queue.filter(a=>a.type==="spend").reduce((sum,a)=>sum+a.points,0);
-      serverPoints=Math.max(0,serverPoints-totalSpent);
-      transaction.update(userRef,{
-        lkogy:serverPoints,
-        history:arrayUnion(...queue.map(a=>({...a})))
-      });
-      state.points=serverPoints;
-      state.history=[...queue.map(a=>({...a, points:-a.points})), ...(state.history||[])];
-    });
-
-    localStorage.removeItem("pendingActions");
-    saveState(); updateUI();
-  }catch(err){ console.error("Sync Error:",err); }
-}
-
-// ===== Init =====
-window.addEventListener("DOMContentLoaded",async()=>{
-  loadState();
-  const offlineDiv=createOfflineUI();
-  if(!navigator.onLine){
-    offlineDiv.style.display="flex";
-  } else { offlineDiv.style.display="none"; }
-  updateUI();
-
-  if(navigator.onLine) await syncWithFirestore();
-});
-
-// ===== Event Listeners =====
-window.addEventListener("offline",()=>{
-  const offlineDiv=createOfflineUI();
-  offlineDiv.style.display="flex"; updateUI();
-});
-window.addEventListener("online",()=>{ 
-  const offlineDiv=document.getElementById("offlineScreen");
-  if(offlineDiv) offlineDiv.style.display="none";
-  syncWithFirestore();
-});
-</script>
-
 
 </body>
 </html> 
